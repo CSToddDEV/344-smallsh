@@ -36,7 +36,7 @@ char* getInput () {
     } while ((buffer[i-1] != EOF) && (buffer[i-1] != '\n'));
     
     //Add Null terminator
-    buffer[i] = '\0';
+    buffer[i - 1] = '\0';
 
     //return input
     return buffer;

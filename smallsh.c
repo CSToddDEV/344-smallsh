@@ -12,8 +12,9 @@ Assignment: Assignment 3 - smallsh
 
 //Function Declarations
 void smallshLoop (void);
+void printEnv (char * envp[]);
 
-int main (int argc, char *argv[]) {
+int main (int argc, char *argv[], char * envp[]) {
     //Declare Variables
     char welcome[] = "Welcome to smallsh by Calvin Todd! Please type --help for help!\n";
     char exit[] = "\nThank you for using smallsh by Calvin Todd!  May the force be with you.";
@@ -24,6 +25,8 @@ int main (int argc, char *argv[]) {
     pWelcome = welcome;
     puts(pWelcome);
     fflush(stdout);
+
+    printEnv(envp);
 
     //Call smallsh loop
     smallshLoop();

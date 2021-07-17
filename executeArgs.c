@@ -15,26 +15,25 @@ Assignment: Assignment 3 - executeArgs
 #define DELIM " "
 
 //Function Declarations
+bool exitShell ();
+void cdShell ();
 
 bool executeArgs (char **args) {
     //Declare Variables
     bool runShell = true;
     char *program = args[0];
     char returnMessage[50];
-    int i = 0;
 
     //Based on the first arg passed choose program to run  
-    fflush(stdout);
-
     if (strcmp(program, "exit") == 0)
     {
-        strcpy(returnMessage, "You hit exit");
-        runShell = false;
+        runShell = exitShell();
     }
 
     else if (strcmp(program, "cd") == 0)
     {
         strcpy(returnMessage, "You hit cd");
+        cdShell(args);
     }
 
     else if (strcmp(program, "status") == 0)
