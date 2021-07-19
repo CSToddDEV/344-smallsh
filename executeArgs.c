@@ -17,8 +17,9 @@ Assignment: Assignment 3 - executeArgs
 //Function Declarations
 bool exitShell ();
 void cdShell ();
+void status (int * statusCode);
 
-bool executeArgs (char **args) {
+bool executeArgs (char **args, int* pStatusCode) {
     //Declare Variables
     bool runShell = true;
     char *program = args[0];
@@ -32,13 +33,18 @@ bool executeArgs (char **args) {
 
     else if (strcmp(program, "cd") == 0)
     {
-        strcpy(returnMessage, "You hit cd");
         cdShell(args);
     }
 
     else if (strcmp(program, "status") == 0)
     {
-        strcpy(returnMessage, "You hit status");
+        status(pStatusCode);
+    }
+
+    else if (program[0] == '#')
+    {
+        //Pass since a comment
+        ;
     }
 
     else
@@ -46,7 +52,9 @@ bool executeArgs (char **args) {
         strcpy(returnMessage, "You hit other!");
     }
 
+    //Error catching, will Remove (gets rid of second blank line)
     puts(returnMessage);
+
     fflush(stdout);
     return runShell;
 }

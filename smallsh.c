@@ -12,7 +12,7 @@ Assignment: Assignment 3 - smallsh
 
 //Function Declarations
 void smallshLoop (void);
-void printEnv (char * envp[]);
+// void printEnv (char * envp[]);
 
 int main (int argc, char *argv[], char * envp[]) {
     //Declare Variables
@@ -26,7 +26,8 @@ int main (int argc, char *argv[], char * envp[]) {
     puts(pWelcome);
     fflush(stdout);
 
-    printEnv(envp);
+    //printEnv for debug
+    // printEnv(envp);
 
     //Call smallsh loop
     smallshLoop();

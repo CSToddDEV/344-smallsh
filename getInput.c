@@ -11,7 +11,6 @@ Assignment: Assignment 3 - getInput
 
 //Constants
 #define BUFFLEN 2049
-#define DELIM " "
 
 //Function Declarations
 
