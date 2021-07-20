@@ -13,14 +13,14 @@ Assignment: Assignment 3 - smallsh - status.c
 //Function Declarations
 
 void status (int * statusCode) {
-    //Declare Variables
+    //Declare Variables and convert to ASCII
     int code = 48 + *statusCode;
     char *codeString;
 
-
+    //Display Status and status message
     codeString = (char *) &code;
     fputs( codeString, stdout);
-    fputs(": Was the exit code/terminating signal of the most recent forecground process", stdout);
+    fputs(": Was the exit code/terminating signal of the most recent foreground process\n", stdout);
     fflush(stdout);
 
 }

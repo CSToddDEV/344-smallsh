@@ -16,7 +16,7 @@ void smallshLoop (void);
 
 int main (int argc, char *argv[], char * envp[]) {
     //Declare Variables
-    char welcome[] = "Welcome to smallsh by Calvin Todd! Please type --help for help!\n";
+    char welcome[] = "Welcome to smallsh by Calvin Todd!\n";
     char exit[] = "\nThank you for using smallsh by Calvin Todd!  May the force be with you.";
     char *pWelcome;
     char *pExit;

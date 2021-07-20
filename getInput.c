@@ -16,7 +16,7 @@ Assignment: Assignment 3 - getInput
 
 char* getInput () {
     //Declare Variables
-    char *buffer = malloc(sizeof(char) * BUFFLEN);
+    char *buffer = malloc(BUFFLEN);
     int i = 0;
 
     //Verify malloc

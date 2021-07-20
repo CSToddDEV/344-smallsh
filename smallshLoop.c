@@ -13,26 +13,22 @@ Assignment: Assignment 3 - smallsh
 
 //Function Declarations
 char* getInput ();
-char ** processInput (char *input);
-bool executeArgs (char **args, int *pStatusCode);
+bool executeArgs (char *input, int *pStatusCode);
 char* variableExpansion (char *input);
 
 void smallshLoop (void) {
     //Declare Variables
     bool runLoop = true;
     char *input;
-    char **args;
     char prompt = ':';
     int statusCode = 0;
     int *pStatusCode = &statusCode;
-    int i;
 
     while (runLoop)
     {
         //Display Cursor set i
         putchar(prompt);
         fflush(stdout);
-        i = 0;
 
         //Get Input
         input = getInput();
@@ -40,22 +36,8 @@ void smallshLoop (void) {
         //Variable Expansion
         input = variableExpansion(input);
 
-        //Process Inputs
-        args = processInput(input);
-
         //Process arguments
-        runLoop = executeArgs(args, pStatusCode);
+        runLoop = executeArgs(input, pStatusCode);
         
-        //Free array of array pointers
-        while (args[i])
-        {
-            printf("HERE ");
-            puts(args[i]);
-            // free(args[i]);
-            i++;
-        }
-
-        //Free pointer to array of pointers
-        // free(args);
     }
 }
