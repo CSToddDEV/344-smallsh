@@ -11,6 +11,4 @@ Assignment: Assignment 3 - smallsh - sigHandlers.c
 
 //Constants
 
-
 //Function Declarations
-

@@ -21,31 +21,40 @@ void zombieChildren (void) {
     pid_t childPID = -1;
     int statusCode;
     int exitCode;
-    char cPID[50];
-    char exitCodeArray[50];
+    int sigCode;
+    char codeArray[50];
 
     //Loop through any children that have finished execution since last input prompt
     childPID = waitpid(-1, &statusCode, WNOHANG);
     while (childPID != -1 && childPID)
     {
+        //Handle Signal exits
+        if (WIFSIGNALED(statusCode))
+        {
+            sigCode = WTERMSIG(statusCode);
+            fputs("terminated by signal number: ", stdout);
+            fflush(stdout);
+            myItoa(sigCode, codeArray);
+            fputs(codeArray, stdout);
+            fflush(stdout);
+        }
         //Get exit status
-        if (WIFEXITED(statusCode))
+        else if (WIFEXITED(statusCode))
         {
             exitCode = WEXITSTATUS(statusCode);
+            //Print message with pid and exit number
+            fputs("Child Process with PID [", stdout);
+            fflush(stdout);
+            myItoa(childPID, codeArray);
+            fputs(codeArray, stdout);
+            fflush(stdout);
+            fputs("] exited with exit code: ", stdout);
+            fflush(stdout);
+            myItoa(exitCode, codeArray);
+            fputs(codeArray, stdout);
+            fflush(stdout);
         }
-        
 
-        //Print message with pid and exit number
-        fputs("Child Process with PID [", stdout);
-        fflush(stdout);
-        myItoa(childPID, cPID);
-        fputs(cPID, stdout);
-        fflush(stdout);
-        fputs("] exited with exit code: ", stdout);
-        fflush(stdout);
-        myItoa(exitCode, exitCodeArray);
-        fputs(exitCodeArray, stdout);
-        fflush(stdout);
         fputs("\n", stdout);
         fflush(stdout);
         childPID = waitpid(-1, &statusCode, WNOHANG);

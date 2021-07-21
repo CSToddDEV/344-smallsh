@@ -3,6 +3,7 @@ Author: Calvin Todd
 Class: CS 344
 Assignment: Assignment 3 - executeArgs
 */
+#define _POSIX_C_SOURCE 200809L
 
 //Imports
 #include <stdio.h>
@@ -39,6 +40,12 @@ bool executeArgs (char *input, int *pStatusCode) {
     bool background = false;
     bool inputSet = false;
     bool outputSet = false;
+    struct sigaction SIGINTHandlerOG;
+
+    //Build sig handler structures
+    SIGINTHandlerOG.sa_handler = SIG_DFL;
+    sigfillset(&SIGINTHandlerOG.sa_mask);
+    SIGINTHandlerOG.sa_flags = 0;
 
     //Split input stringin to args
     args[i] = strtok(input, " ");
@@ -148,8 +155,13 @@ bool executeArgs (char *input, int *pStatusCode) {
 
             case 0:
                 //Child Proccess
-
-                    //If input was not set in args
+                //Change sigaction
+                if (!background)
+                {
+                    sigaction(SIGINT, &SIGINTHandlerOG, NULL);
+                }
+                
+                //If input was not set in args
                 if (!inputSet && background)
                 {
                     //Open /dev/null to read read for input
@@ -287,6 +299,19 @@ bool executeArgs (char *input, int *pStatusCode) {
                     {
                         statusID = WEXITSTATUS(childStatus);
                         pStatusCode = &statusID;
+                    }
+
+                    //Handle Signal exits
+                    if (WIFSIGNALED(childStatus))
+                    {
+                        statusID = WTERMSIG(childStatus);
+                        fputs("\nterminated by signal number: ", stdout);
+                        fflush(stdout);
+                        myItoa(statusID, cPID);
+                        fputs(cPID, stdout);
+                        fflush(stdout);
+                        fputs("\n", stdout);
+                        fflush(stdout);
                     }
                 }
                 
