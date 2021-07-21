@@ -10,12 +10,10 @@ Assignment: Assignment 3 - smallsh - variableExpansion.c
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include "smallsh.h"
 
 //Constants
 #define BUFFLEN 2049
-
-//Function Declarations
-void myItoa (int pid, char *pPID);
 
 char * variableExpansion (char *input) {
     //Declare Variables

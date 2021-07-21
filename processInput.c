@@ -8,6 +8,7 @@ Assignment: Assignment 3 - processInput
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "smallsh.h"
 
 //Constants
 #define MAXARGS 513

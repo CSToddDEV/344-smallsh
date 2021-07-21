@@ -6,31 +6,30 @@ Assignment: Assignment 3 - smallsh - myItoa.c
 
 //Imports
 #include <stdio.h>
-
-//Constants
-
-
-//Function Declarations
+#include "smallsh.h"
 
 void myItoa (int pid, char *pPID) {
     //Declare Variables
     int i = 0; //pPid index
-    int n; //number to turn in to ascii
+    int n = 0; //number to turn in to ascii
 
-    while (pid > 0)
+    if (pid >= 0)
     {
-        //Convert int to ASCII
-        n = pid % 10;
-        n = n + 48;
+        do
+        {
+            //Convert int to ASCII
+            n = pid % 10;
+            n = n + 48;
 
-        //Add to pPID
-        pPID[i] = n;
+            //Add to pPID
+            pPID[i] = n;
 
 
-        //Update pid
-        pid = pid / 10;
+            //Update pid
+            pid = pid / 10;
 
-        i++;
+            i++;
+        } while (pid > 0);
     }
     pPID[i] = '\0';
 }

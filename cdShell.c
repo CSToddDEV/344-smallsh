@@ -10,11 +10,10 @@ Assignment: Assignment 3 - smallsh -  cdShell.c
 #include <unistd.h>
 #include <sys/stat.h>
 #include <string.h>
+#include "smallsh.h"
 
 //Constants
 #define MAXPATH 1024
-
-//Function Declarations
 
 void cdShell (char **args) {
     //Declare variables
@@ -23,22 +22,25 @@ void cdShell (char **args) {
     char err2[] = ": No such file or directory";
     char err3[MAXPATH];
 
-    if (!dir)
+    if (dir)
     {
-        //If no second argument, change to home
-        chdir(getenv("HOME"));
-    }
-    else if (chdir(dir) == 0)
-    {
-
+        if (chdir(dir) == 0)
+        {
+            ;
+        }
+        else
+        {
+            //Print error
+            strncat(err3, err, sizeof(err3));
+            strncat(err3, dir, sizeof(err3));
+            strncat(err3, err2, sizeof(err3));
+            puts(err3);
+            fflush(stdout);
+        }
     }
     else
     {
-        //Print error
-        strncat(err3, err, sizeof(err3));
-        strncat(err3, dir, sizeof(err3));
-        strncat(err3, err2, sizeof(err3));
-        puts(err3);
-        fflush(stdout);
+        //If no second argument, change to home
+        chdir(getenv("HOME"));
     }
 }

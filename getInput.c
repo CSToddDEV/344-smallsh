@@ -8,11 +8,10 @@ Assignment: Assignment 3 - getInput
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "smallsh.h"
 
 //Constants
 #define BUFFLEN 2049
-
-//Function Declarations
 
 char* getInput () {
     //Declare Variables
@@ -35,7 +34,8 @@ char* getInput () {
     } while ((buffer[i-1] != EOF) && (buffer[i-1] != '\n'));
     
     //Add Null terminator
-    buffer[i - 1] = '\0';
+    buffer[i - 1] = ' ';
+    buffer[i] = '\0';
 
     //return input
     return buffer;

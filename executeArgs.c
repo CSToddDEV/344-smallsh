@@ -13,28 +13,27 @@ Assignment: Assignment 3 - executeArgs
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <fcntl.h>
+#include "smallsh.h"
 
 //Constants
 #define BUFFLEN 2049
 #define DELIM " "
 
-//Function Declarations
-bool exitShell ();
-void cdShell ();
-void status (int * statusCode);
-
-bool executeArgs (char *input, int* pStatusCode) {
+bool executeArgs (char *input, int *pStatusCode) {
     //Declare Variables
-    char *program;
+    char* program;
     char* arg;
-    char* file;
+    char* fileInput;
+    char* fileOutput;
     char* devNull = "/dev/null";
-    char *args[512];
+    char cPID[25];
+    char* args[512];
     char ampString[] = "&";
-    int fdInput;
-    int fdOutput;
+    int fdInput = -1;
+    int fdOutput = -1;
     int childStatus;
     int i = 0;
+    int statusID;
     pid_t spawnPID;
     bool runShell = true;
     bool background = false;
@@ -52,6 +51,7 @@ bool executeArgs (char *input, int* pStatusCode) {
         //Break loop if Null
         if (!arg)
         {
+            args[i] = arg;
             break;
         }
 
@@ -59,56 +59,20 @@ bool executeArgs (char *input, int* pStatusCode) {
         //Handle Input
         if (strcmp(arg, "<") == 0)
         {
-            //Open file to read read for input
-            file = strtok(NULL, " ");
-            fdInput = open(file, O_RDONLY);
-            
-            //Check fd to make sure file was opened
-            if (fdInput < 0)
-            {
-                fputs("ERROR: ", stderr);
-                fputs(file, stderr);
-                fputs(" was not a readable file.\n", stderr);
-                *pStatusCode = 1;
-                return runShell;
-            }
-            
-            //Redirect stdin and check if succesful
-            if (dup2(fdInput, stdin) < 0)
-            {
-                fputs("ERROR: Unable to duplicate file descriptor in dup2()\n", stderr);
-                *pStatusCode = 1;
-                return runShell;
-            }
+            //Get file to read read for input
+            fileInput = strtok(NULL, " ");
             inputSet = true;
+            i--;
             
         }
 
         //Handle Output
         else if (strcmp(arg, ">") == 0)
         {
-            //Open file to read read for input
-            file = strtok(NULL, " ");
-            fdOutput = open(file, O_CREAT | O_WRONLY | O_TRUNC, 0755);
-            
-            //Check fd to make sure file was opened
-            if (fdOutput < 0)
-            {
-                fputs("ERROR: ", stderr);
-                fputs(file, stderr);
-                fputs(" was not a valid output file.\n", stderr);
-                *pStatusCode = 1;
-                return runShell;
-            }
-            
-            //Redirect stdin and check if succesful
-            if (dup2(fdOutput, stdout) < 0)
-            {
-                fputs("ERROR: Unable to duplicate file descriptor in dup2()\n", stderr);
-                *pStatusCode = 1;
-                return runShell;
-            }
+            //Get file to write for output
+            fileOutput = strtok(NULL, " ");
             outputSet = true;
+            i--;
         }
 
         //Handle Background
@@ -119,6 +83,7 @@ bool executeArgs (char *input, int* pStatusCode) {
             if (!arg)
             {
                 background = true;
+                i--;
             }
             else
             {
@@ -138,6 +103,13 @@ bool executeArgs (char *input, int* pStatusCode) {
     }
 
     program = args[0];
+
+    if (!program)
+    {
+        //If blank line return
+        free(input);
+        return runShell;
+    }
 
     //Based on the first arg passed choose program to run  
     if (strcmp(program, "exit") == 0)
@@ -177,62 +149,102 @@ bool executeArgs (char *input, int* pStatusCode) {
             case 0:
                 //Child Proccess
 
-                //If inputs are not set, set them to /dev/null
-                if (background)
-                {
                     //If input was not set in args
-                    if (!setInput)
-                    {
-                        //Open /dev/null to read read for input
-                        fdInput = open(devNull, O_RDONLY);
+                if (!inputSet && background)
+                {
+                    //Open /dev/null to read read for input
+                    fdInput = open(devNull, O_RDONLY);
                         
-                        //Check fd to make sure file was opened
-                        if (fdInput < 0)
-                        {
-                            fputs("ERROR: ", stderr);
-                            fputs(file, stderr);
-                            fputs(" was not a readable file.\n", stderr);
-                            *pStatusCode = 1;
-                            return runShell;
-                        }
-            
-                        //Redirect stdin and check if succesful
-                        if (dup2(fdInput, stdin) < 0)
-                        {
-                            fputs("ERROR: Unable to duplicate file descriptor in dup2()\n", stderr);
-                            *pStatusCode = 1;
-                            return runShell;
-                        }
-                        inputSet = true;
+                    //Check fd to make sure file was opened
+                    if (fdInput < 0)
+                    {
+                        fputs("ERROR: ", stderr);
+                        fputs(fileInput, stderr);
+                        fputs(" was not a readable file.\n", stderr);
+                        *pStatusCode = 1;
+                        return runShell;
                     }
-
-                    //If output was not set in args
-                    if (!setOutput)
-                    {
-                        //Open /dev/null to read read for input
-                        fdOutput = open(file, O_CREAT | O_WRONLY | O_TRUNC, 0755);
-                        
-                        //Check fd to make sure file was opened
-                        if (fdOutput < 0)
-                        {
-                            fputs("ERROR: ", stderr);
-                            fputs(file, stderr);
-                            fputs(" was not a valid output file.\n", stderr);
-                            *pStatusCode = 1;
-                            return runShell;
-                        }
             
-                        //Redirect stdin and check if succesful
-                        if (dup2(fdOutput, stdout) < 0)
-                        {
-                            fputs("ERROR: Unable to duplicate file descriptor in dup2()\n", stderr);
-                            *pStatusCode = 1;
-                            return runShell;
-                        }
-                        inputSet = true;
+                    //Redirect stdin and check if succesful
+                    if (dup2(fdInput, 0) < 0)
+                    {
+                        fputs("ERROR: Unable to duplicate file descriptor in dup2()\n", stderr);
+                        *pStatusCode = 1;
+                        return runShell;
+                    }
+                }
+                //Set input
+                else if (inputSet)
+                {
+                    fdInput = open(fileInput, O_RDONLY);
+            
+                    //Check fd to make sure file was opened
+                    if (fdInput < 0)
+                    {
+                        fputs("ERROR: ", stderr);
+                        fputs(fileInput, stderr);
+                        fputs(" was not a readable file.\n", stderr);
+                        *pStatusCode = 1;
+                        return runShell;
+                    }
+                        
+                    //Redirect stdin and check if succesful
+                    if (dup2(fdInput, 0) < 0)
+                    {
+                        fputs("ERROR: Unable to duplicate file descriptor in dup2()\n", stderr);
+                        *pStatusCode = 1;
+                        return runShell;
                     }
                 }
 
+                //If output was not set in args
+                if (!outputSet && background)
+                {
+                    //Open /dev/null to read read for input
+                    fdOutput = open(devNull, O_CREAT | O_WRONLY | O_TRUNC, 0755);
+                        
+                    //Check fd to make sure file was opened
+                    if (fdOutput < 0)
+                    {
+                        fputs("ERROR: ", stderr);
+                        fputs(fileOutput, stderr);
+                        fputs(" was not a valid output file.\n", stderr);
+                        *pStatusCode = 1;
+                        return runShell;
+                    }
+            
+                    //Redirect stdin and check if succesful
+                    if (dup2(fdOutput, 1) < 0)
+                    {
+                        fputs("ERROR: Unable to duplicate file descriptor in dup2()\n", stderr);
+                        *pStatusCode = 1;
+                        return runShell;
+                    }
+                }
+                //Set output
+                else if (outputSet)
+                {
+                    fdOutput = open(fileOutput, O_CREAT | O_WRONLY | O_TRUNC, 0755);
+            
+                    //Check fd to make sure file was opened
+                    if (fdOutput < 0)
+                    {
+                        fputs("ERROR: ", stderr);
+                        fputs(fileOutput, stderr);
+                        fputs(" was not a valid output file.\n", stderr);
+                        *pStatusCode = 1;
+                        return runShell;
+                    }
+                        
+                    //Redirect stdin and check if succesful
+                    if (dup2(fdOutput, 1) < 0)
+                    {
+                        fputs("ERROR: Unable to duplicate file descriptor in dup2()\n", stderr);
+                        *pStatusCode = 1;
+                        return runShell;
+                    }
+                }
+                
                 //Child Proccess Run Command from path
                 execvp(program, args);
 
@@ -248,7 +260,20 @@ bool executeArgs (char *input, int* pStatusCode) {
                 //Run the program in the background if the background flag is set
                 if (background)
                 {
-                    continue;
+                    //Get PID and print to error output (since stdout might be different)
+                    waitpid(spawnPID, &childStatus, WNOHANG);
+                    fputs("Child process ", stderr);
+                    fflush(stdout);
+                    fputs(program, stderr);
+                    fflush(stdout);
+                    fputs(" began in the background with PID: ", stderr);
+                    fflush(stdout);
+                    myItoa(spawnPID, cPID);
+                    fputs(cPID, stderr);
+                    fflush(stdout);
+                    fputs("\n", stderr);
+                    fflush(stdout);
+
                 }
 
                 //Else Run the Porgram in the foreground
@@ -260,7 +285,8 @@ bool executeArgs (char *input, int* pStatusCode) {
                     //Set exit process
                     if (WIFEXITED(childStatus))
                     {
-                        *pStatusCode = WEXITSTATUS(childStatus);
+                        statusID = WEXITSTATUS(childStatus);
+                        pStatusCode = &statusID;
                     }
                 }
                 
@@ -268,13 +294,13 @@ bool executeArgs (char *input, int* pStatusCode) {
     }
 
     //Close input file if open
-    if (fdInput)
+    if (fdInput > 0)
     {
         close(fdInput);
     }
 
     //Close output file if open
-    if (fdOutput)
+    if (fdOutput > 0)
     {
         close(fdOutput);
     }

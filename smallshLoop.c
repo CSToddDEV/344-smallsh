@@ -8,13 +8,7 @@ Assignment: Assignment 3 - smallsh
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
-
-//Constants
-
-//Function Declarations
-char* getInput ();
-bool executeArgs (char *input, int *pStatusCode);
-char* variableExpansion (char *input);
+#include "smallsh.h"
 
 void smallshLoop (void) {
     //Declare Variables
@@ -26,6 +20,9 @@ void smallshLoop (void) {
 
     while (runLoop)
     {
+        //Check pBGProcessArray for recently closed Background Processes, and free pointers
+        zombieChildren();
+
         //Display Cursor set i
         putchar(prompt);
         fflush(stdout);
@@ -38,6 +35,6 @@ void smallshLoop (void) {
 
         //Process arguments
         runLoop = executeArgs(input, pStatusCode);
-        
+
     }
 }

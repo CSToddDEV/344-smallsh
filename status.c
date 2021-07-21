@@ -6,11 +6,7 @@ Assignment: Assignment 3 - smallsh - status.c
 
 //Imports
 #include <stdio.h>
-
-//Constants
-
-
-//Function Declarations
+#include "smallsh.h"
 
 void status (int * statusCode) {
     //Declare Variables and convert to ASCII

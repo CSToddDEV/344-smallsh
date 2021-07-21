@@ -1,7 +1,7 @@
 /*
 Author: Calvin Todd
 Class: CS 344
-Assignment: Assignment 3 - smallsh -exitShell.c
+Assignment: Assignment 3 - smallsh - sigHandlers.c
 */
 
 //Imports
@@ -14,6 +14,3 @@ Assignment: Assignment 3 - smallsh -exitShell.c
 
 //Function Declarations
 
-bool exitShell () {
-    return false;
-}

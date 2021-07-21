@@ -6,13 +6,7 @@ Assignment: Assignment 3 - smallsh
 
 //Imports
 #include <stdio.h>
-
-//Constants
-
-
-//Function Declarations
-void smallshLoop (void);
-// void printEnv (char * envp[]);
+#include "smallsh.h"
 
 int main (int argc, char *argv[], char * envp[]) {
     //Declare Variables
