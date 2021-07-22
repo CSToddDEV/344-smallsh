@@ -6,12 +6,10 @@ Assignment: Assignment 3 - smallsh
 #define _POSIX_C_SOURCE 200809L
 
 //Imports
-#include <stdio.h>
-#include <signal.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 #include "smallsh.h"
+
+//Global Variable Flag
+volatile sig_atomic_t fgOnly = 0;
 
 int main (int argc, char *argv[], char * envp[]) {
     //Declare Variables
@@ -20,20 +18,23 @@ int main (int argc, char *argv[], char * envp[]) {
     char *pWelcome;
     char *pExit;
     struct sigaction SIGINTHandler = {0};
+    struct sigaction SIGSTPHandler = {0};
 
     //Build sig handler structures
     SIGINTHandler.sa_handler = SIG_IGN;
     sigfillset(&SIGINTHandler.sa_mask);
     SIGINTHandler.sa_flags = 0;
-    sigaction(SIGINT, &SIGINTHandler, NULL); 
+    sigaction(SIGINT, &SIGINTHandler, NULL);
+
+    SIGSTPHandler.sa_handler = handleSIGTSTP;
+    sigfillset(&SIGSTPHandler.sa_mask);
+    SIGSTPHandler.sa_flags = 0;
+    sigaction(SIGTSTP, &SIGSTPHandler, NULL);
 
     //Welcome
     pWelcome = welcome;
     puts(pWelcome);
     fflush(stdout);
-
-    //printEnv for debug
-    // printEnv(envp);
 
     //Call smallsh loop
     smallshLoop();

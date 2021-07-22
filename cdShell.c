@@ -5,11 +5,6 @@ Assignment: Assignment 3 - smallsh -  cdShell.c
 */
 
 //Imports
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <string.h>
 #include "smallsh.h"
 
 //Constants

@@ -5,7 +5,6 @@ Assignment: Assignment 3 - smallsh - status.c
 */
 
 //Imports
-#include <stdio.h>
 #include "smallsh.h"
 
 void status (int * statusCode) {

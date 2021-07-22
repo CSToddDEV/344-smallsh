@@ -5,11 +5,6 @@ Assignment: Assignment 3 - smallsh - variableExpansion.c
 */
 
 //Imports
-#include <stdio.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
 #include "smallsh.h"
 
 //Constants
@@ -26,42 +21,32 @@ char * variableExpansion (char *input) {
 
     myItoa(pid, pPID); //Turn pid in to a character array.
 
-    //If comment return input
-    if (input[0] == '#')
-    {
-        return input;
-    }
-    else
-    {
-        while (input[i])
+    while (input[i])
         {
-            //Check for expansion variable
-            if ((input[i] == '$') && (input[i + 1] == '$'))
+        //Check for expansion variable
+        if ((input[i] == '$') && (input[i + 1] == '$'))
+        {
+            k = 0;
+            //Copy PID in to variable
+            while (pPID[k])
             {
-                k = 0;
-                //Copy PID in to variable
-                while (pPID[k])
-                {
-                    expandedInput[j] = pPID[k];
-                    k++;
-                    j++;
-                }
-
-                i = i + 2;
-            }
-            else
-            {
-                //Copy non-variable character
-                expandedInput[j] = input[i];
-                i++;
+                expandedInput[j] = pPID[k];
+                k++;
                 j++;
             }
+
+            i = i + 2;
         }
-        expandedInput[j] = '\0';
-    
-        //Free old input buffer
-        free(input);
-        return expandedInput;
+        else
+        {
+            //Copy non-variable character
+            expandedInput[j] = input[i];
+            i++;
+            j++;
+        }
     }
+    expandedInput[j] = '\0';
+
+    return expandedInput;
     
 }

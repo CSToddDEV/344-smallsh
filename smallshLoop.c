@@ -5,18 +5,15 @@ Assignment: Assignment 3 - smallsh
 */
 
 //Imports
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
 #include "smallsh.h"
 
 void smallshLoop (void) {
     //Declare Variables
     bool runLoop = true;
     char *input;
+    char* exInput;
     char prompt = ':';
     int statusCode = 0;
-    int *pStatusCode = &statusCode;
 
     while (runLoop)
     {
@@ -31,10 +28,12 @@ void smallshLoop (void) {
         input = getInput();
 
         //Variable Expansion
-        input = variableExpansion(input);
+        exInput = variableExpansion(input);
 
         //Process arguments
-        runLoop = executeArgs(input, pStatusCode);
+        runLoop = executeArgs(exInput, &statusCode);
 
+        free(input);
+        free(exInput);
     }
 }

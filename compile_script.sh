@@ -11,7 +11,7 @@ echo "Compiling has begun..."
 echo
 
 echo "Compiling smallsh.c ----> smallsh"
-gcc smallsh.c smallshLoop.c getInput.c executeArgs.c exitShell.c printEnv.c cdShell.c variableExpansion.c myItoa.c status.c zombieChildren.c -std=c11 -Wall -Werror -g3 -o smallsh -lm
+gcc smallsh.c smallshLoop.c getInput.c executeArgs.c exitShell.c cdShell.c variableExpansion.c myItoa.c status.c zombieChildren.c sigHandlers.c -std=c11 -Wall -Werror -g3 -o smallsh -lm
 echo
 
 echo "Compiling Complete!"

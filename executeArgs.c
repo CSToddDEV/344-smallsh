@@ -6,14 +6,6 @@ Assignment: Assignment 3 - executeArgs
 #define _POSIX_C_SOURCE 200809L
 
 //Imports
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <fcntl.h>
 #include "smallsh.h"
 
 //Constants
@@ -41,11 +33,17 @@ bool executeArgs (char *input, int *pStatusCode) {
     bool inputSet = false;
     bool outputSet = false;
     struct sigaction SIGINTHandlerOG;
+    struct sigaction SIGSTPHandler = {0};
 
     //Build sig handler structures
     SIGINTHandlerOG.sa_handler = SIG_DFL;
     sigfillset(&SIGINTHandlerOG.sa_mask);
     SIGINTHandlerOG.sa_flags = 0;
+
+    SIGSTPHandler.sa_handler = SIG_IGN;
+    sigfillset(&SIGSTPHandler.sa_mask);
+    SIGSTPHandler.sa_flags = 0;
+    
 
     //Split input stringin to args
     args[i] = strtok(input, " ");
@@ -89,7 +87,11 @@ bool executeArgs (char *input, int *pStatusCode) {
             arg = strtok(NULL, " ");
             if (!arg)
             {
-                background = true;
+                //Check global flag for SIGTSTP and ignoring &
+                if (fgOnly == 0)
+                {
+                    background = true;
+                }
                 i--;
             }
             else
@@ -109,12 +111,12 @@ bool executeArgs (char *input, int *pStatusCode) {
         }
     }
 
+    //Add \0 to array
     program = args[0];
 
     if (!program)
     {
         //If blank line return
-        free(input);
         return runShell;
     }
 
@@ -134,7 +136,7 @@ bool executeArgs (char *input, int *pStatusCode) {
         status(pStatusCode);
     }
 
-    else if (program[0] == '#')
+    else if (strncmp(program, "#", 1) == 0)
     {
         //Pass since a comment
         ;
@@ -149,12 +151,13 @@ bool executeArgs (char *input, int *pStatusCode) {
         switch(spawnPID) {
             case -1:
                 perror("Error in fork(): ");
-                free(input);
                 exit(1);
                 break;
 
             case 0:
                 //Child Proccess
+                //Set sigaction for SIGSTP
+                sigaction(SIGTSTP, &SIGSTPHandler, NULL);
                 //Change sigaction
                 if (!background)
                 {
@@ -174,6 +177,7 @@ bool executeArgs (char *input, int *pStatusCode) {
                         fputs(fileInput, stderr);
                         fputs(" was not a readable file.\n", stderr);
                         *pStatusCode = 1;
+                        exit(1);
                         return runShell;
                     }
             
@@ -182,6 +186,7 @@ bool executeArgs (char *input, int *pStatusCode) {
                     {
                         fputs("ERROR: Unable to duplicate file descriptor in dup2()\n", stderr);
                         *pStatusCode = 1;
+                        exit(1);
                         return runShell;
                     }
                 }
@@ -197,6 +202,7 @@ bool executeArgs (char *input, int *pStatusCode) {
                         fputs(fileInput, stderr);
                         fputs(" was not a readable file.\n", stderr);
                         *pStatusCode = 1;
+                        exit(1);
                         return runShell;
                     }
                         
@@ -205,6 +211,7 @@ bool executeArgs (char *input, int *pStatusCode) {
                     {
                         fputs("ERROR: Unable to duplicate file descriptor in dup2()\n", stderr);
                         *pStatusCode = 1;
+                        exit(1);
                         return runShell;
                     }
                 }
@@ -222,6 +229,7 @@ bool executeArgs (char *input, int *pStatusCode) {
                         fputs(fileOutput, stderr);
                         fputs(" was not a valid output file.\n", stderr);
                         *pStatusCode = 1;
+                        exit(1);
                         return runShell;
                     }
             
@@ -230,6 +238,7 @@ bool executeArgs (char *input, int *pStatusCode) {
                     {
                         fputs("ERROR: Unable to duplicate file descriptor in dup2()\n", stderr);
                         *pStatusCode = 1;
+                        exit(1);
                         return runShell;
                     }
                 }
@@ -245,6 +254,7 @@ bool executeArgs (char *input, int *pStatusCode) {
                         fputs(fileOutput, stderr);
                         fputs(" was not a valid output file.\n", stderr);
                         *pStatusCode = 1;
+                        exit(1);
                         return runShell;
                     }
                         
@@ -253,6 +263,7 @@ bool executeArgs (char *input, int *pStatusCode) {
                     {
                         fputs("ERROR: Unable to duplicate file descriptor in dup2()\n", stderr);
                         *pStatusCode = 1;
+                        exit(1);
                         return runShell;
                     }
                 }
@@ -262,13 +273,12 @@ bool executeArgs (char *input, int *pStatusCode) {
 
                 //Error catching if execvp doesn't find command
                 puts("ERROR: Command not found");
-                free(input);
+                
                 exit(1);
                 break;
 
             default:
                 //Parent Proccess
-
                 //Run the program in the background if the background flag is set
                 if (background)
                 {
@@ -298,23 +308,28 @@ bool executeArgs (char *input, int *pStatusCode) {
                     if (WIFEXITED(childStatus))
                     {
                         statusID = WEXITSTATUS(childStatus);
-                        pStatusCode = &statusID;
+                        *pStatusCode = statusID;
                     }
 
                     //Handle Signal exits
                     if (WIFSIGNALED(childStatus))
                     {
                         statusID = WTERMSIG(childStatus);
-                        fputs("\nterminated by signal number: ", stdout);
+                        fputs("\nProcess [", stdout);
+                        fflush(stdout);
+                        myItoa(spawnPID, cPID);
+                        fputs(cPID, stdout);
+                        fflush(stdout);
+                        fputs("] terminated by signal number: ", stdout);
                         fflush(stdout);
                         myItoa(statusID, cPID);
                         fputs(cPID, stdout);
                         fflush(stdout);
                         fputs("\n", stdout);
                         fflush(stdout);
+                        *pStatusCode = statusID;
                     }
                 }
-                
         }
     }
 
@@ -329,9 +344,6 @@ bool executeArgs (char *input, int *pStatusCode) {
     {
         close(fdOutput);
     }
-
-
-    free(input);
 
     return runShell;
 }

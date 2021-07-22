@@ -5,11 +5,6 @@ Assignment: Assignment 3 - smallsh - zombieChildren.c
 */
 
 //Imports
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include "smallsh.h"
 
 //Constants
@@ -25,14 +20,19 @@ void zombieChildren (void) {
     char codeArray[50];
 
     //Loop through any children that have finished execution since last input prompt
-    childPID = waitpid(-1, &statusCode, WNOHANG);
+    childPID = waitpid(-1, &statusCode, WNOHANG|WUNTRACED);
     while (childPID != -1 && childPID)
     {
         //Handle Signal exits
         if (WIFSIGNALED(statusCode))
         {
             sigCode = WTERMSIG(statusCode);
-            fputs("terminated by signal number: ", stdout);
+            fputs("Process [", stdout);
+            fflush(stdout);
+            myItoa(childPID, codeArray);
+            fputs(codeArray, stdout);
+            fflush(stdout);
+            fputs("] terminated by signal number: ", stdout);
             fflush(stdout);
             myItoa(sigCode, codeArray);
             fputs(codeArray, stdout);

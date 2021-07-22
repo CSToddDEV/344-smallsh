@@ -1,0 +1,136 @@
+#!/bin/bash
+
+echo "PRE-SCRIPT INFO"
+echo "  Grading Script PID: $$"
+echo '  Note: your smallsh will report a different PID when evaluating $$'
+
+./smallsh <<'___EOF___'
+echo BEGINNING TEST SCRIPT
+ps
+echo
+echo --------------------
+echo Using comment (5 points if only next prompt is displayed next)
+#THIS COMMENT SHOULD DO NOTHING
+ps
+echo
+echo
+echo --------------------
+echo ls (10 points for returning dir contents)
+ls
+ps
+echo
+echo
+echo --------------------
+echo ls out junk
+ls > junk
+ps
+echo
+echo
+echo --------------------
+echo cat junk (15 points for correctly returning contents of junk)
+cat junk
+ps j
+echo
+echo
+echo --------------------
+echo wc in junk (15 points for returning correct numbers from wc)
+wc < junk
+ps j
+echo
+echo
+echo --------------------
+echo wc in junk out junk2; cat junk2 (10 points for returning correct numbers from wc)
+wc < junk > junk2
+ps j
+cat junk2
+ps
+echo
+echo
+echo --------------------
+echo test -f badfile (10 points for returning error value of 1, note extraneous &)
+test -f badfile
+ps
+status &
+ps
+echo
+echo
+echo --------------------
+echo wc in badfile (10 points for returning text error)
+wc < badfile
+ps
+echo
+echo
+echo --------------------
+echo badfile (10 points for returning text error)
+badfile
+ps
+echo
+echo
+echo --------------------
+echo sleep 100 background (10 points for returning process ID of sleeper)
+sleep 100 &
+ps
+echo
+echo
+echo --------------------
+echo pkill -signal SIGTERM sleep (10 points for pid of killed process, 10 points for signal)
+echo (Ignore message about Operation Not Permitted)
+pkill sleep
+ps
+echo
+echo
+echo --------------------
+echo sleep 1 background (10 pts for pid of bg ps when done, 10 for exit value)
+sleep 1 &
+sleep 1
+ps
+echo
+echo
+echo --------------------
+echo pwd
+pwd
+ps
+echo
+echo
+echo --------------------
+echo cd
+cd
+ps
+echo
+echo
+echo --------------------
+echo pwd (10 points for being in the HOME dir)
+pwd
+ps j
+echo
+echo
+echo --------------------
+echo mkdir testdir$$
+mkdir testdir$$
+ps j
+echo
+echo
+echo --------------------
+echo cd testdir$$
+cd testdir$$
+ps j
+echo
+echo
+echo --------------------
+echo pwd (5 points for being in the newly created dir)
+pwd
+ps j
+echo --------------------
+echo Testing foreground-only mode (20 points for entry & exit text AND ~5 seconds between times)
+echo kill -SIGTSTP $$
+kill -SIGTSTP $$
+date
+sleep 5 &
+date
+echo kill -SIGTSTP $$
+kill -SIGTSTP $$
+echo $$
+ps j
+exit
+pstree
+___EOF___

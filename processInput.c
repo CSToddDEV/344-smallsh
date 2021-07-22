@@ -5,9 +5,6 @@ Assignment: Assignment 3 - processInput
 */
 
 //Imports
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "smallsh.h"
 
 //Constants
