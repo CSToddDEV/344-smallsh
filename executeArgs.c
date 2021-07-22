@@ -32,8 +32,9 @@ bool executeArgs (char *input, int *pStatusCode) {
     bool background = false;
     bool inputSet = false;
     bool outputSet = false;
-    struct sigaction SIGINTHandlerOG;
+    struct sigaction SIGINTHandlerOG = {0};
     struct sigaction SIGSTPHandler = {0};
+    struct sigaction SIGUSRHandler = {0};
 
     //Build sig handler structures
     SIGINTHandlerOG.sa_handler = SIG_DFL;
@@ -43,6 +44,12 @@ bool executeArgs (char *input, int *pStatusCode) {
     SIGSTPHandler.sa_handler = SIG_IGN;
     sigfillset(&SIGSTPHandler.sa_mask);
     SIGSTPHandler.sa_flags = 0;
+
+    //Build sig handler structures - custom sigUsr1 for exit progcedure
+    SIGUSRHandler.sa_handler = sigExit;
+    sigfillset(&SIGUSRHandler.sa_mask);
+    SIGUSRHandler.sa_flags = 0;
+
     
 
     //Split input stringin to args
@@ -158,6 +165,8 @@ bool executeArgs (char *input, int *pStatusCode) {
                 //Child Proccess
                 //Set sigaction for SIGSTP
                 sigaction(SIGTSTP, &SIGSTPHandler, NULL);
+                //Custom exit handler
+                sigaction(SIGUSR1, &SIGUSRHandler, NULL);
                 //Change sigaction
                 if (!background)
                 {

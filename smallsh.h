@@ -30,6 +30,7 @@ char* variableExpansion (char *input);
 void myItoa (int pid, char *pPID);
 void zombieChildren (void);
 void handleSIGTSTP (int sig);
+void sigExit (int sid);
 
 //Global Variable Declaration
 extern volatile sig_atomic_t fgOnly;

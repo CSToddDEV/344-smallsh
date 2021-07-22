@@ -22,3 +22,7 @@ void handleSIGTSTP (int sig) {
         fgOnly = 0;
     }
 }
+
+void sigExit (int sid) {
+    exit(0);
+}
